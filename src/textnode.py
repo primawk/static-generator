@@ -1,7 +1,8 @@
 from enum import Enum
+from htmlnode import LeafNode
 
 class TextType(Enum):
-    PLAIN ="plain"
+    TEXT ="text"
     BOLD = "bold"
     ITALIC = "italic"
     CODE = "code"
@@ -22,6 +23,41 @@ class TextNode:
 
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
+
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
+    if text_node.text_type == TextType.TEXT:
+        return LeafNode(None, text_node.text)
+    if text_node.text_type == TextType.BOLD:
+        return LeafNode("b", text_node.text)
+    if text_node.text_type == TextType.ITALIC:
+        return LeafNode("i", text_node.text)
+    if text_node.text_type == TextType.CODE:
+        return LeafNode("code", text_node.text)
+    if text_node.text_type == TextType.LINK:
+        return LeafNode("a", text_node.text, "href")
+    if text_node.text_type == TextType.IMAGE:
+        return LeafNode("img", "", {src: text_node.url, alt: text_node.text})
+    raise Exception("unknown text node")
+
+def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
+    result = []
+    if delimiter not in old_nodes[0].text:
+        raise Exception("there is no macthing delimiter")
+    splitted_value = old_nodes[0].text.split(delimiter)
+    for i in range(len(splitted_value)):
+        if i == 1:
+            result.append(TextNode(splitted_value[i], text_type))
+        else:
+            result.append(TextNode(splitted_value[i], TextType.TEXT))
+    return result
+
+
+
+        
+        
+
+
+    
 
         
         
