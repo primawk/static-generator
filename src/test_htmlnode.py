@@ -1,6 +1,6 @@
 import unittest
 from htmlnode import HTMLNode, LeafNode, ParentNode
-from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, split_nodes_image
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -43,8 +43,32 @@ class TestHTMLNode(unittest.TestCase):
         node = TextNode("This is text with a **bolded phrase** in the middle", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)          
         self.assertEqual(new_nodes[1], TextNode("bolded phrase", TextType.BOLD))
+        
+    # def test_extract_markdown_images(self):
+    #     matches = extract_markdown_images(
+    #     "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+    #     )
+    #     self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
+    def test_split_images(self):
+        node = TextNode(
+        "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+        TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+        [
+            TextNode("This is text with an ", TextType.TEXT),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode(
+                "second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"
+            ),
+        ],
+        new_nodes,
+        )
 
+    
 
 if __name__ == "__main__":
     unittest.main()
