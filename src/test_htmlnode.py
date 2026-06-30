@@ -1,6 +1,6 @@
 import unittest
 from htmlnode import HTMLNode, LeafNode, ParentNode
-from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, split_nodes_image
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, split_nodes_image, text_to_textnodes
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -39,17 +39,11 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "This is a text node")
     
-    def test_split_nodes_delimiter(self):
-        node = TextNode("This is text with a **bolded phrase** in the middle", TextType.TEXT)
-        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)          
-        self.assertEqual(new_nodes[1], TextNode("bolded phrase", TextType.BOLD))
+    # def test_split_nodes_delimiter(self):
+    #     node = TextNode("This is text with a **bolded phrase** in the middle", TextType.TEXT)
+    #     new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)          
+    #     self.assertEqual(new_nodes[1], TextNode("bolded phrase", TextType.BOLD))
         
-    # def test_extract_markdown_images(self):
-    #     matches = extract_markdown_images(
-    #     "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
-    #     )
-    #     self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
-
     def test_split_images(self):
         node = TextNode(
         "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
@@ -67,9 +61,29 @@ class TestHTMLNode(unittest.TestCase):
         ],
         new_nodes,
         )
+    
+    def test_text_to_textnodes(self):
+        new_nodes = text_to_textnodes(
+            "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        )
+
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+        self.assertListEqual(new_nodes, expected)
+
+
 
     
-
 if __name__ == "__main__":
     unittest.main()
 

@@ -42,38 +42,99 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
     result = []
-    if delimiter not in old_nodes[0].text:
-        raise Exception("there is no macthing delimiter")
-    splitted_value = old_nodes[0].text.split(delimiter)
-    for i in range(len(splitted_value)):
-        if i == 1:
-            result.append(TextNode(splitted_value[i], text_type))
-        else:
-            result.append(TextNode(splitted_value[i], TextType.TEXT))
+    for node in old_nodes:  
+        if node.text_type != TextType.TEXT:
+            result.append(node)
+            continue
+
+        if delimiter not in node.text:
+            result.append(node)
+            continue
+            
+        splitted_value = node.text.split(delimiter)
+
+        for i in range(len(splitted_value)):
+                if i % 2 == 0:
+                    result.append(TextNode(splitted_value[i], TextType.TEXT))
+                else:
+                    result.append(TextNode(splitted_value[i], text_type))
     return result
 
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
     result = []
-    extracted_value = extract_markdown_images(old_nodes[0].text)
-    splitted_value = old_nodes[0].text.split(f"![{extracted_value[0][0]}]({extracted_value[0][1]})", 1)
-    for alt, url in extracted_value:
-        print(f"Alt: {alt}")
-        print(f"URL: {url}")
-    # for i in range(len(extracted_value)):
-        # splitted_value = old_nodes[0].text.split(f"![{extracted_value[i][0]}]({extracted_value[i][1]})", 1)
-        # print(splitted_value)
-    # for i in range(len(splitted_value)):
-    #     print(splitted_value[i])
-    #     result.append(TextNode(splitted_value[i], TextType.TEXT))
-    # print(result)
+    
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            result.append(node)
+            continue
+            
+        text = node.text
+        extracted_value = extract_markdown_images(text)
 
+        if len(extracted_value) == 0:
+            result.append(node)
+            continue
+        
+        for i in range(len(extracted_value)):
+            image_markdown = f"![{extracted_value[i][0]}]({extracted_value[i][1]})"
 
-  
+            before, after = text.split(image_markdown, maxsplit=1)
+
+            text = after
+            if len(before) > 0:
+                result.append(TextNode(before, TextType.TEXT))
+
+            result.append(TextNode(extracted_value[i][0], TextType.IMAGE, extracted_value[i][1]))
+
+        if len(text) > 0:
+             result.append(TextNode(text, TextType.TEXT))
+    return result
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    result = []
+    
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            result.append(node)
+            continue
+            
+        text = node.text
+        extracted_value = extract_markdown_images(text)
+
+        if len(extracted_value) == 0:
+            result.append(node)
+            continue
+        
+        for i in range(len(extracted_value)):
+            image_markdown = f"![{extracted_value[i][0]}]({extracted_value[i][1]})"
+
+            before, after = text.split(image_markdown, maxsplit=1)
+
+            text = after
+            if len(before) > 0:
+                result.append(TextNode(before, TextType.TEXT))
+
+            result.append(TextNode(extracted_value[i][0], TextType.LINK, extracted_value[i][1]))
+
+        if len(text) > 0:
+             result.append(TextNode(text, TextType.TEXT))
+    return result
+    
 def extract_markdown_images(text):
     return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
 def extract_markdown_links(text):
     return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def text_to_textnodes(text):
+    node = TextNode(text, TextType.TEXT)
+    result_bold = split_nodes_delimiter([node], "**", TextType.BOLD)
+    result_italic = split_nodes_delimiter(result_bold, "_", TextType.ITALIC)
+    result_code = split_nodes_delimiter(result_italic, "`", TextType.CODE)
+    result_image = split_nodes_image(result_code)
+
+
+
 
 
     
