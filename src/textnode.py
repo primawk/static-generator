@@ -99,16 +99,16 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             continue
             
         text = node.text
-        extracted_value = extract_markdown_images(text)
+        extracted_value = extract_markdown_links(text)
 
         if len(extracted_value) == 0:
             result.append(node)
             continue
         
         for i in range(len(extracted_value)):
-            image_markdown = f"![{extracted_value[i][0]}]({extracted_value[i][1]})"
+            link_markdown = f"[{extracted_value[i][0]}]({extracted_value[i][1]})"
 
-            before, after = text.split(image_markdown, maxsplit=1)
+            before, after = text.split(link_markdown, maxsplit=1)
 
             text = after
             if len(before) > 0:
@@ -124,7 +124,7 @@ def extract_markdown_images(text):
     return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
 def extract_markdown_links(text):
-    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
 def text_to_textnodes(text):
     node = TextNode(text, TextType.TEXT)
@@ -132,6 +132,8 @@ def text_to_textnodes(text):
     result_italic = split_nodes_delimiter(result_bold, "_", TextType.ITALIC)
     result_code = split_nodes_delimiter(result_italic, "`", TextType.CODE)
     result_image = split_nodes_image(result_code)
+    return split_nodes_link(result_image)
+
 
 
 
