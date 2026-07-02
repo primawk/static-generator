@@ -18,17 +18,20 @@ def markdown_to_blocks(markdown):
     return result
 
 def block_to_block_type(markdown):
-    if markdown.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+    block = markdown_to_blocks(markdown)[0]
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return BlockType.HEADING
-    if markdown.startswith("```\n ") and markdown.endswith("```"):
+    if block.startswith("```\n") and block.endswith("```"):
         return BlockType.CODE
-    if markdown.startswith((">", "> ")):
+    if block.startswith((">", "> ")):
         return BlockType.QUOTE
-    if markdown.startswith("- "):
+    if block.startswith("- "):
         return BlockType.UNORDERED
-    if markdown.startswith(re.match(r"^\d+\.")):
+    if re.match(r"^\d+\.", block):
         return BlockType.ORDERED
     return BlockType.PARAGRAPH
+
+
     
 
     

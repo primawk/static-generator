@@ -6,7 +6,11 @@ class HTMLNode:
         self.props = props
 
     def to_html(self):
-        raise NotImplementedError
+        if self.value == None:
+            raise ValueError("value is required.")
+        if self.tag == None:
+            return f"{self.value}"
+        return f"<{self.tag}{f' {self.props}' if self.props is not None else ''}>{self.value}</{self.tag}>"
     
     def props_to_html(self):
         if self.props == None:
@@ -60,6 +64,9 @@ class ParentNode(HTMLNode):
             output_recursion += children.to_html()
             
         return f"<{self.tag}{f' {self.props}' if self.props is not None else ''}>{output_recursion}</{self.tag}>"
+
+
+
 
 
 

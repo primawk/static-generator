@@ -1,5 +1,6 @@
 from enum import Enum
-from htmlnode import LeafNode
+from htmlnode import LeafNode, ParentNode
+from blocknode import markdown_to_blocks, block_to_block_type, BlockType
 import re
 
 class TextType(Enum):
@@ -133,6 +134,26 @@ def text_to_textnodes(text):
     result_code = split_nodes_delimiter(result_italic, "`", TextType.CODE)
     result_image = split_nodes_image(result_code)
     return split_nodes_link(result_image)
+    
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    children = []
+    
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        if block_type == BlockType.PARAGRAPH:
+            children.append(ParentNode("p", text_to_children(block)))
+        if block_type == BlockType.HEADING:
+            level = 0
+            while block[level] == "#":
+                level += 1
+            children.append(ParentNode("h1", text_to_children(block[level + 1:])))
+    return ParentNode("div", children)
+
+def text_to_children(text):
+    text_nodes = text_to_textnodes(text)
+    return [text_node_to_html_node(node) for node in text_nodes]
 
 
 
