@@ -14,7 +14,10 @@ def markdown_to_blocks(markdown):
     result = []
 
     for block in markdown.split("\n\n"):
-        result.append("\n".join(line.strip() for line in block.strip().splitlines()))
+        cleaned = "\n".join(line.strip() for line in block.strip().splitlines())
+
+        if cleaned:
+            result.append(cleaned)
     return result
 
 def block_to_block_type(markdown):

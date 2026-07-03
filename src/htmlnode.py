@@ -62,7 +62,7 @@ class ParentNode(HTMLNode):
         output_recursion = ""
         for children in self.children:
             output_recursion += children.to_html()
-            
+
         return f"<{self.tag}{f' {self.props}' if self.props is not None else ''}>{output_recursion}</{self.tag}>"
 
 

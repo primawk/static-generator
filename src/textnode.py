@@ -1,5 +1,5 @@
 from enum import Enum
-from htmlnode import LeafNode, ParentNode
+from htmlnode import LeafNode, ParentNode, HTMLNode
 from blocknode import markdown_to_blocks, block_to_block_type, BlockType
 import re
 
@@ -143,12 +143,40 @@ def markdown_to_html_node(markdown):
     for block in blocks:
         block_type = block_to_block_type(block)
         if block_type == BlockType.PARAGRAPH:
-            children.append(ParentNode("p", text_to_children(block)))
+            children.append(ParentNode("p", text_to_children(" ".join(block.splitlines()))))
         if block_type == BlockType.HEADING:
             level = 0
             while block[level] == "#":
                 level += 1
-            children.append(ParentNode("h1", text_to_children(block[level + 1:])))
+            
+            children.append(ParentNode(f"h{level}", text_to_children(block[level + 1:])))
+        if block_type == BlockType.QUOTE:
+            level = 0
+            while block[level] == ">":
+                level += 1
+            children.append(ParentNode("blockquote", text_to_children(block[level + 1:])))
+        if block_type == BlockType.UNORDERED:
+            items = block.split("-")
+            cleaned = [item.strip() for item in items if item.strip()]
+            result = ""
+            for item in cleaned:
+                result += "<li>" + item + "</li>"
+            children.append(ParentNode("ul", text_to_children(result)))
+        if block_type == BlockType.ORDERED:
+            items = re.split(r"\d+\.\s", block)
+            cleaned = [item.strip() for item in items if item.strip()]
+            result = ""
+            for item in cleaned:
+                result += "<li>" + item + "</li>"
+            children.append(ParentNode("ol", text_to_children(result)))
+        if block_type == BlockType.CODE:
+            lines = block.splitlines()
+            code = "\n".join(lines[1:-1]) + "\n"
+            text_node = TextNode(code, TextType.TEXT)
+            html_node = text_node_to_html_node(text_node)
+            code_node = ParentNode("code", [html_node])
+            children.append(ParentNode("pre", [code_node]))
+
     return ParentNode("div", children)
 
 def text_to_children(text):
