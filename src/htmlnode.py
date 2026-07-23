@@ -30,6 +30,7 @@ class LeafNode(HTMLNode):
         super().__init__(props)
         self.tag = tag
         self.value = value
+        self.props = props
   
     def to_html(self):
         if self.value == None:

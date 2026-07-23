@@ -4,9 +4,8 @@ import shutil
 def copy_content(source, destination):
     if os.path.exists(destination):
         shutil.rmtree(destination)
-        os.mkdir(destination)
-    else:
-        os.mkdir(destination)
+
+    os.makedirs(destination, exist_ok=True)
 
     for filename in os.listdir(source):
             src = os.path.join(source, filename)
