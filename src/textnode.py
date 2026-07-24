@@ -38,7 +38,8 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     if text_node.text_type == TextType.LINK:
         return LeafNode("a", text_node.text, f"href={text_node.url}")
     if text_node.text_type == TextType.IMAGE:
-        return LeafNode("img", "", f"src: {text_node.url}, alt: {text_node.text}")
+        print(text_node.text)
+        return LeafNode("img", "", f"src={text_node.url} alt={text_node.text}")
     raise Exception("unknown text node")
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
